@@ -111,6 +111,14 @@ pc.defineParameter(
 )
 
 pc.defineParameter(
+    name="fake_bench_id",
+    description="Which workbench bench to use for fake base station",
+    typ=portal.ParameterType.STRING,
+    defaultValue=bench_ids[1],
+    legalValues=bench_ids
+)
+
+pc.defineParameter(
     name="srsran_commit_hash",
     description="Commit hash for srsRAN",
     typ=portal.ParameterType.STRING,
@@ -243,7 +251,7 @@ fake_nodeb.addService(rspec.Execute(shell="bash", command="/local/repository/bin
 
 fake_nodeb_sdr = request.RawPC("fake_nodeb-sdr")
 fake_nodeb_sdr.component_manager_id = COMP_MANAGER_ID
-fake_nodeb_sdr.component_id = BENCH_SDR_IDS[params.bench_id][0]
+fake_nodeb_sdr.component_id = BENCH_SDR_IDS[params.fake_bench_id][0]
 fake_nodeb_sdr_if = fake_nodeb_sdr.addInterface("fake_nodeb-sdr-if")
 
 fake_nodeb_sdr_link = request.Link("fake_nodeb-sdr-link")
