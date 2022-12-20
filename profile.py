@@ -229,11 +229,11 @@ else:
     fake_nodeb.disk_image = UBUNTU_IMG
 
 
-fake_nodeb_cn_if = nodeb.addInterface("fake_nodeb-cn-if")
+fake_nodeb_cn_if = fake_nodeb.addInterface("fake_nodeb-cn-if")
 fake_nodeb_cn_if.addAddress(rspec.IPv4Address("192.168.1.2", "255.255.255.0"))
 fake_cn_link.addInterface(fake_nodeb_cn_if)
 
-fake_nodeb_usrp_if = nodeb.addInterface("fake_nodeb-usrp-if")
+fake_nodeb_usrp_if = fake_nodeb.addInterface("fake_nodeb-usrp-if")
 fake_nodeb_usrp_if.addAddress(rspec.IPv4Address("192.168.40.1", "255.255.255.0"))
 
 cmd = '{} "{}"'.format(SRS_DEPLOY_SCRIPT, srsran_hash)
