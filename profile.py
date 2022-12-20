@@ -197,6 +197,62 @@ nodeb_sdr_link.bandwidth = 10*1000*1000
 nodeb_sdr_link.addInterface(nodeb_usrp_if)
 nodeb_sdr_link.addInterface(nodeb_sdr_if)
 
+# ----------------------------Fake Base Station -----------------------------
+fake_cn_node = request.RawPC("fake_cn-host")
+fake_cn_node.component_manager_id = COMP_MANAGER_ID
+fake_cn_node.hardware_type = params.cn_nodetype
+fake_cn_node.disk_image = UBUNTU_IMG
+fake_cn_if = fake_cn_node.addInterface("fake_cn-if")
+fake_cn_if.addAddress(rspec.IPv4Address("192.168.1.1", "255.255.255.0"))
+fake_cn_link = request.Link("fake_cn-link")
+fake_cn_link.bandwidth = 10*1000*1000
+fake_cn_link.addInterface(fake_cn_if)
+fake_cn_node.addService(rspec.Execute(shell="bash", command=IP_NAT_SCRIPT))
+fake_cn_node.addService(rspec.Execute(shell="bash", command=OPEN5GS_DEPLOY_SCRIPT))
+
+if params.srsran_commit_hash:
+    srsran_hash = params.srsran_commit_hash
+else:
+    srsran_hash = DEFAULT_SRS_HASH
+
+fake_nodeb = request.RawPC("fake_nodeb-comp")
+fake_nodeb.component_manager_id = COMP_MANAGER_ID
+
+if params.nodeb_node_id:
+    fake_nodeb.component_id = params.nodeb_node_id
+else:
+    fake_nodeb.hardware_type = params.sdr_nodetype
+
+if params.sdr_compute_image:
+    fake_nodeb.disk_image = params.sdr_compute_image
+else:
+    fake_nodeb.disk_image = UBUNTU_IMG
+
+
+fake_nodeb_cn_if = nodeb.addInterface("fake_nodeb-cn-if")
+fake_nodeb_cn_if.addAddress(rspec.IPv4Address("192.168.1.2", "255.255.255.0"))
+fake_cn_link.addInterface(fake_nodeb_cn_if)
+
+fake_nodeb_usrp_if = nodeb.addInterface("fake_nodeb-usrp-if")
+fake_nodeb_usrp_if.addAddress(rspec.IPv4Address("192.168.40.1", "255.255.255.0"))
+
+cmd = '{} "{}"'.format(SRS_DEPLOY_SCRIPT, srsran_hash)
+fake_nodeb.addService(rspec.Execute(shell="bash", command=cmd))
+fake_nodeb.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
+fake_nodeb.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
+
+fake_nodeb_sdr = request.RawPC("fake_nodeb-sdr")
+fake_nodeb_sdr.component_manager_id = COMP_MANAGER_ID
+fake_nodeb_sdr.component_id = BENCH_SDR_IDS[params.bench_id][0]
+fake_nodeb_sdr_if = fake_nodeb_sdr.addInterface("fake_nodeb-sdr-if")
+
+fake_nodeb_sdr_link = request.Link("fake_nodeb-sdr-link")
+fake_nodeb_sdr_link.bandwidth = 10*1000*1000
+fake_nodeb_sdr_link.addInterface(fake_nodeb_usrp_if)
+fake_nodeb_sdr_link.addInterface(fake_nodeb_sdr_if)
+# ---------------------------------------------------------------------------
+
+
 ue = request.RawPC("ue-comp")
 ue.component_manager_id = COMP_MANAGER_ID
 
